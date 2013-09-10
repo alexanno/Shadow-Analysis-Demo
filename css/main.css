@@ -20,12 +20,9 @@ html, body, #map{
 		font-size: 18px;
 }
 
-.caret{
-}
 
 .leaflet-bottom{
-	position: fixed;
-	top:0px;
+	padding-bottom: 50px;
 }
 
 .leaflet-control-container{

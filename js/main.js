@@ -12,6 +12,10 @@ var topo2enkel = L.tileLayer.wms("http://opencache.statkart.no/gatekeeper/gk/gk.
 });
 
 // start the map in South-East England
+L.control.scale({
+	position: 'topright',
+	imperial: false
+}).addTo(map);
 L.control.locate().addTo(map);
 map.setView(new L.LatLng(63.4305077539775, 10.395039268075),10);
 map.addLayer(topo2enkel);
