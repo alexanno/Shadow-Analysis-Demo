@@ -6,9 +6,6 @@ html, body, #map{
     overflow: hidden;
 }
 
-.navbar{
-	opacity: 0.8;
-}
 
 .navbar .navbar-brand {
 	font-family: 'Josefin Sans', sans-serif;
@@ -25,6 +22,3 @@ html, body, #map{
 	padding-bottom: 50px;
 }
 
-.leaflet-control-container{
-	opacity: 0.8;
-}
