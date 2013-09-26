@@ -42,13 +42,21 @@ L.CanvasLayer = L.Class.extend({
       'viewreset': this._reset
     }, this);
 
-    map.on('move', this._render, this);
+    map.on('moveend', this._render, this);
+
+    map.on('movestart', this.clearCanvas, this);
 
     if(this.options.tileLoader) {
       this._initTileLoader();
     }
 
     this._reset();
+  },
+
+  clearCanvas: function(){
+    var canvas = this.getCanvas();
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
   },
 
   getCanvas: function() {

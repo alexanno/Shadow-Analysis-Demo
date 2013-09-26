@@ -52,7 +52,7 @@ var canvasLayer = L.CanvasLayer.extend({
 				// console.log(getNormalVector(polygon[0]));
 			};
 		}
-		// stackBlurCanvasRGB(canvas,0,0,canvas.width,canvas.height,35);
+		stackBlurCanvasRGB(canvas,0,0,canvas.width,canvas.height,25);
 
 
 	}
