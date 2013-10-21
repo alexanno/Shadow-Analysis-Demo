@@ -30,11 +30,12 @@ var connString = 'tcp://steffenp@localhost:5431/steffenp';
 io.sockets.on('connection', function(socket){
 		console.log("connected to client");
 		socket.on('dbcall', function(bbox){
-			var query = "SELECT ST_AsGeoJSON(ST_Collect(t2geo)) As WKT FROM terraintrondheim WHERE terraintrondheim.t2geo && ST_MakeEnvelope("+bbox[0]+","+bbox[1]+","+bbox[2]+","+bbox[3]+");";
+			var query = "SELECT tpgeo As nvec,ST_AsGeoJSON(t2geo) As WKT FROM terraintrondheim WHERE terraintrondheim.t2geo && ST_MakeEnvelope("+bbox[0]+","+bbox[1]+","+bbox[2]+","+bbox[3]+") ORDER BY tpgeo;";
 			pg.connect(connString, function(err, client, done){
 				client.query(query, function(err, result) {
 					if(result.rows[0] != undefined) {
-						socket.emit('dbresponse', result.rows[0].wkt);
+						console.log(result);
+						socket.emit('dbresponse', result);
 					}
 					done();
 				});

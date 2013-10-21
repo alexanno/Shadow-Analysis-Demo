@@ -42,7 +42,7 @@ L.CanvasLayer = L.Class.extend({
       'viewreset': this._reset
     }, this);
 
-    map.on('moveend', this._render, this);
+    // map.on('moveend', this._render, this);
 
     map.on('movestart', this.clearCanvas, this);
 

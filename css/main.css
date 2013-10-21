@@ -22,3 +22,7 @@ html, body, #map{
 	padding-bottom: 50px;
 }
 
+#select-group{
+	padding-left: 20px;
+	padding-right: 20px;
+}

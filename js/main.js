@@ -1,4 +1,5 @@
 var jsonpolygons; //polygons for the shadow
+var date = new Date();
 var map = L.map('map');
 
 // var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -17,7 +18,7 @@ L.control.scale({
 	imperial: false
 }).addTo(map);
 L.control.locate().addTo(map);
-map.setView(new L.LatLng(63.4305077539775, 10.395039268075),13);
+map.setView(new L.LatLng(63.4305077539775, 10.395039268075),11);
 map.addLayer(topo2enkel);
 
 var canvasLayer = L.CanvasLayer.extend({
@@ -25,36 +26,36 @@ var canvasLayer = L.CanvasLayer.extend({
 		var canvas = this.getCanvas();
 		var ctx = canvas.getContext('2d');
 		ctx.clearRect(0,0,canvas.width,canvas.height);
-		// ctx.fillStyle = 'grey';
 		ctx.globalAlpha = 0.5;
 
-		if(jsonpolygons != undefined && map.getZoom() > 11){
-			for(var i=0; i<jsonpolygons.coordinates.length; i++){
-				polygon = jsonpolygons.coordinates[i];
+	
+		if(jsonpolygons != undefined && map.getZoom() > 2){
+			for(var i=0; i<jsonpolygons.rowCount;i++){
+
+				var polygon = JSON.parse(jsonpolygons.rows[i].wkt);
+				var nvec = jsonpolygons.rows[i].nvec.split(' ');
 				ctx.beginPath();
-				for(var j=0; j<polygon[0].length;j++){
-					var coordinate = polygon[0][j];
+				var coordinates = polygon.coordinates[0];
+				for(var j=0; j<coordinates.length;j++){
+					var coordinate = coordinates[j];
 					var drawpoints = map.latLngToContainerPoint(new L.LatLng(coordinate[1],coordinate[0]));
-					if(i == 0){
+					drawpoints.x	 = (0.5 + drawpoints.x) << 0;
+					drawpoints.y = (0.5 + drawpoints.y) << 0;
+					if(j == 0){
 						ctx.moveTo(drawpoints.x,drawpoints.y);
 					}
 					else{
 						ctx.lineTo(drawpoints.x,drawpoints.y);
 					}
-				};
-				ctx.closePath();
-				ctx.fillStyle = "rgb("+
-  					Math.floor(Math.random()*256)+","+
-  					Math.floor(Math.random()*256)+","+
-  					Math.floor(Math.random()*256)+")";
+				}
+				var sunvec = getSunVector(map.getCenter());
+				var angle = getAngleBetweenVectors(sunvec,nvec);
+				var amount = angle/2*Math.PI;
+				ctx.fillStyle = "hsl(0,0%,"+amount*100+"%)";
 				ctx.fill();
-				debugger
-				// console.log(getNormalVector(polygon[0]));
-			};
+			}
 		}
-		stackBlurCanvasRGB(canvas,0,0,canvas.width,canvas.height,25);
-
-
+		// stackBlurCanvasRGB(canvas,0,0,canvas.width,canvas.height,25);
 	}
 });
 
@@ -77,27 +78,21 @@ map.on('moveend', function(e){
 });
 
 // recieve delaunay triangles
-socket.on('dbresponse', function(polygons){
-	jsonpolygons = JSON.parse(polygons);
+socket.on('dbresponse', function(result){
+	jsonpolygons = result;
+	console.log(result);
 	clayer.redraw();
 });
 
-var getNormalVector = function(polygon){
-	var normal = [0,0,0];
-	for(var i = 0; i<polygon.length; i++){
-		var current = polygon[i];
-		var next = polygon[i+1] % polygon.length;
-		normal[0] = normal[0] + ((current[1]-next[1])*(current[2]+next[2]));
-		normal[1] = normal[1] + ((current[2]-next[2])*(current[0]+next[0]));
-		normal[2] = normal[2] + ((current[0]-next[0])*(current[1]+next[1]));
-	}
-	return normalizeVector(normal);
-};
+function getSunVector(latLng){
+	var sunsphere = SunCalc.getSunPosition(date,latLng.lat,latLng.lng);
+	var sunvec = [Math.sin(sunsphere.altitude)*Math.cos(sunsphere.azimuth),Math.sin(sunsphere.altitude)*Math.sin(sunsphere.azimuth),Math.cos(sunsphere.altitude)];
+	return sunvec;
+}
 
-var normalizeVector = function(vec){
-	var veclength = vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
-	vec[0] = vec[0]/veclength;
-	vec[1] = vec[1]/veclength;
-	vec[2] = vec[2]/veclength;
-	return vec;
-};
+function getAngleBetweenVectors(sunvec,nvec){
+	var dot = sunvec[0]*nvec[0]+sunvec[1]*nvec[1]+sunvec[2]*nvec[2];
+	var lensun = Math.sqrt(sunvec[0]*sunvec[0]+sunvec[1]*sunvec[1]+sunvec[2]*sunvec[2]); 
+	var lennvec = Math.sqrt(nvec[0]*nvec[0]+nvec[1]*nvec[1]+nvec[2]*nvec[2]);
+	return Math.acos(dot/(lensun*lennvec));
+}
