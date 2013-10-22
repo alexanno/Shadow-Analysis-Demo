@@ -35,11 +35,11 @@
         </div>
 
         <div class="btn-group-sm navbar-btn pull-right" id="select-group" data-toggle="buttons">
-          <label class="btn btn-primary">
-            <input type="radio" name="options" id="option1"> TIN
+          <label class="btn btn-primary" id="tin">
+            <input type="radio" name="options"> TIN
           </label>
-          <label class="btn btn-primary">
-            <input type="radio" name="options" id="option2"> WebGL
+          <label class="btn btn-primary" id="webgl">
+            <input type="radio" name="options"> WebGL
           </label>
         </div>
 
@@ -63,13 +63,15 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
     <script src="js/leaflet.js"></script>
+    <script src="js/three.min.js" type="text/javascript"></script>
     <script src="js/L.Control.Locate.js" type="text/javascript"></script>
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <script src="js/leaflet_canvas_layer.js" type="text/javascript"></script>
     <script src="js/leaflet_tileloader_mixin.js" type="text/javascript"></script>
     <script src="js/StackBlur.js" type="text/javascript"></script>
     <script src="js/SunCalc.js" type="text/javascript"></script>
-
+    <script src="js/TinCanvas.js" type="text/javascript"></script>
+    <script src="js/WebGLLayer.js" type="text/javascript"></script>
     <script src="js/main.js"></script>
   </body>
   </html>
