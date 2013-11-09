@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)http://webgl.uni-hd.de/realtime-WebGIS/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>WebGL - GIS Analysis</title>
+		<link rel="stylesheet" type="text/css" href="./WebGL - GIS Analysis_files/main.css">
+		<script id="shader-fs" type="x-shader/x-fragment">
+		  //this ifdef is a temporary work-around for the (upcoming) strict shader validator
+		  #ifdef GL_ES
+		  precision highp float;
+		  #endif
+
+		  varying vec2 vTextureCoord;
+
+		  uniform sampler2D uDemTexture;
+		  uniform sampler2D uColorDemTexture;
+		  uniform float uAzimuthDeg;
+		  uniform float uZenithDeg;
+		  uniform int uMode;
+		  uniform int uBitMode; //unpack two 8-bitchannels to a 16-bit Integer 
+
+		  void main(void)
+		  {
+			float PI = 2.0 * asin(1.0);
+			float width = 1024.0;
+			float height = 1024.0;
+			float maxHeight = 43798.0;
+			float minHeight = 0.0;
+			
+			float cellsize = 160.0;
+			float zFactor = 1.0;
+			
+			float diffHeight = maxHeight - minHeight;
+			
+			float azimuth = uAzimuthDeg; //degrees
+			float zenithRad = (90.0 - uZenithDeg) * PI / 180.0; 
+			//float azimuthRad = uAzimuthDeg;
+			float azimuthRad = radians(360.0 - azimuth + 90.0);
+			float slopeRad;
+			float aspectRad;
+			float hillshade;
+			
+			//sample cells
+			float a,b,c,d,f,g,h,i;
+			
+			//check if border pixel
+			if((vTextureCoord.s >= 1.0/width && vTextureCoord.s < (width-1.0)/width) && vTextureCoord.t >= 1.0/height && vTextureCoord.t < (height-1.0)/height){
+				
+					//RateOfChangeXY 
+					vec4 aTex = texture2D(uDemTexture, vec2(vTextureCoord.s - (1.0/width), vTextureCoord.t - (1.0/height)));
+					vec4 bTex = texture2D(uDemTexture, vec2(vTextureCoord.s, vTextureCoord.t - (1.0/height)));
+					vec4 cTex = texture2D(uDemTexture, vec2(vTextureCoord.s + (1.0/width), vTextureCoord.t - (1.0/height)));
+					vec4 dTex = texture2D(uDemTexture, vec2(vTextureCoord.s - (1.0/width), vTextureCoord.t));
+					vec4 eTex = texture2D(uDemTexture, vec2(vTextureCoord.s, vTextureCoord.t)); //actual Pixel
+					vec4 fTex = texture2D(uDemTexture, vec2(vTextureCoord.s + (1.0/width), vTextureCoord.t));
+					vec4 gTex = texture2D(uDemTexture, vec2(vTextureCoord.s - (1.0/width), vTextureCoord.t + (1.0/height)));
+					vec4 hTex = texture2D(uDemTexture, vec2(vTextureCoord.s, vTextureCoord.t + (1.0/height)));
+					vec4 iTex = texture2D(uDemTexture, vec2(vTextureCoord.s + (1.0/width), vTextureCoord.t + (1.0/height)));
+					
+					if (uBitMode == 8){
+					//multiply Min-Max streched 8 bit values with real height values
+					 a = aTex.r * diffHeight + minHeight;
+					 b = bTex.r * diffHeight + minHeight;
+					 c = cTex.r * diffHeight + minHeight;
+					 d = dTex.r * diffHeight + minHeight;
+					 // e = dTex.r; //not used in hillshade but for height color
+					 f = fTex.r * diffHeight + minHeight;
+					 g = gTex.r * diffHeight + minHeight;
+					 h = hTex.r * diffHeight + minHeight;
+					 i = iTex.r * diffHeight + minHeight;
+					}
+					
+					if (uBitMode == 16){
+					//multiply Min-Max streched 8 bit values with real height values
+					 a = aTex.r*255.0 + (aTex.g*65280.0) + minHeight;
+					 b = bTex.r*255.0 + (bTex.g*65280.0) + minHeight;
+					 c = cTex.r*255.0 + (cTex.g*65280.0) + minHeight;
+					 d = dTex.r*255.0 + (dTex.g*65280.0) + minHeight;
+					// e = dTex.r; //not used in hillshade but for height color
+					 f = fTex.r*255.0 + (fTex.g*65280.0) + minHeight;
+					 g = gTex.r*255.0 + (gTex.g*65280.0) + minHeight;
+					 h = hTex.r*255.0 + (hTex.g*65280.0) + minHeight;
+					 i = iTex.r*255.0 + (iTex.g*65280.0) + minHeight;
+					}
+					
+					
+					float rateOfChangeX = ((c + (2.0*f) + i) - (a + (2.0*d) + g)) / (8.0 * cellsize);
+					float rateOfChangeY = ((g + (2.0*h) + i) - (a + (2.0*b) + c)) / (8.0 * cellsize);
+					
+					//Slope
+					if (uMode == 4 || uMode == 3 || uMode == 1){
+						slopeRad = atan(zFactor * sqrt(pow(rateOfChangeX,2.0) + pow(rateOfChangeY,2.0)));	
+					}
+					
+					
+					//Aspect
+					if(uMode == 4 || uMode == 3 || uMode == 2){
+						aspectRad = 9.0; //rad will never be 9.0 so this means flat
+					 if (rateOfChangeX != 0.0){
+						aspectRad = atan(rateOfChangeY, -(rateOfChangeX));
+						if (aspectRad < 0.0){
+							aspectRad = (2.0 * PI) + aspectRad;
+						}
+					 }
+					 else if (rateOfChangeY > 0.0){
+							aspectRad = PI / 2.0;
+							}
+							else if (rateOfChangeY < 0.0){
+								aspectRad =  (2.0 * PI) - (PI / 2.0);
+							}
+							else {
+								aspectRad = aspectRad; //???
+							}
+					}
+					
+					
+					//Hillshade
+					if(uMode == 4 || uMode == 3){
+						hillshade = (cos(zenithRad) * cos(slopeRad)) + (sin(zenithRad) * sin(slopeRad) * cos(azimuthRad - aspectRad));
+					}
+					
+					//Output according to Mode
+					
+					//HILLSHADE with COLORDEM
+					if(uMode == 4){
+						vec4 demColor = texture2D(uColorDemTexture, vec2(vTextureCoord.s, vTextureCoord.t));
+						float hillshade2 = hillshade/2.0;
+						gl_FragColor = vec4(hillshade2 + demColor.r / 2.0, hillshade2 + demColor.g/2.0, hillshade2 + demColor.b/2.0, 1.0); //hillshade pixel
+					}
+					
+					//HILLSHADE
+					if(uMode == 3){
+						gl_FragColor = vec4(hillshade, hillshade, hillshade, 1.0); //hillshade pixel
+						}
+					
+					//ASPECT
+					if(uMode == 2){
+						//aspect classification
+						vec3 aspectColor;
+						float aspectRadN = mod(2.0*PI - aspectRad + (PI/2.0), 2.0*PI); 
+						float PI16 = PI/16.0; 
+						//N
+						if(aspectRadN >= 2.0*PI - PI16 || aspectRadN < PI16){aspectColor = vec3(1.0,0.0,0.0);}
+						//NE
+						if(aspectRadN >= PI16 && aspectRadN < PI/4.0 + PI16){aspectColor = vec3(1.0,0.7,0.0);}
+						//E
+						if(aspectRadN >= PI/4.0 + PI16 && aspectRadN < PI/2.0 + PI16){aspectColor = vec3(1.0,1.0,0.0);}
+						//SE
+						if(aspectRadN >= PI/2.0 + PI16 && aspectRadN < PI*3.0/4.0 + PI16){aspectColor = vec3(0.0,1.0,0.0);}
+						//S
+						if(aspectRadN >= PI*3.0/4.0 + PI16 && aspectRadN < PI + PI16){aspectColor = vec3(0.0,1.0,1.0);}
+						//SW
+						if(aspectRadN >= PI + PI16 && aspectRadN < PI*5.0/4.0 + PI16){aspectColor = vec3(0.0,0.5,1.0);}
+						//W
+						if(aspectRadN >= PI*5.0/4.0 + PI16 && aspectRadN < PI*3.0/2.0 + PI16){aspectColor = vec3(0.4,0.0,1.0);}
+						//NW
+						if(aspectRadN >= PI*3.0/2.0 + PI16 && aspectRadN < 2.0*PI - PI16){aspectColor = vec3(1.0,0.0,1.0);}
+						//Flat
+						if(aspectRad > PI*2.0){aspectColor = vec3(0.7,0.7,0.7);} 
+						
+						gl_FragColor = vec4(aspectColor, 1.0); //aspect pixel
+					}
+					
+					//SLOPE
+					float slope;
+					if(uMode == 1){
+						//color ramp for slope from red to yellow, green
+						slope = slopeRad/(2.0 * PI);
+						gl_FragColor = vec4(slope*4.25*1.5, (1.5*1.0)-(4.25*slope), 0.0, 1.0); //slope pixel
+					}					
+					
+					//DEM
+					if(uMode == 0){
+						gl_FragColor = texture2D(uDemTexture, vec2(vTextureCoord.s, vTextureCoord.t));
+					}
+					
+					
+					
+					//gl_FragColor = vec4(demColor); //hillshade pixel
+					
+					
+					
+					
+					
+					
+			}
+			
+			else {
+				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); //black border pixel
+			}
+		  }
+		</script>
+		<script id="line-shader-fs" type="x-shader/x-fragment">
+			//this ifdef is a temporary work-around for the (upcoming) strict shader validator
+		  #ifdef GL_ES
+		  precision highp float;
+		  #endif
+		  
+		  void main(void)
+		  {
+		  	gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+		  }
+		</script>
+
+		<script id="line-shader-vs" type="x-shader/x-vertex">
+		  attribute vec3 aVertexPosition;
+		  //attribute vec2 aTextureCoord;
+		
+		 // uniform mat4 uMVMatrix;
+		 // uniform mat4 uPMatrix;
+		  //varying vec2 vTextureCoord;
+		  
+		  
+		  void main(void)
+		  {
+		   // gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+			
+			gl_Position = vec4(aVertexPosition, 1.0);
+			//vTextureCoord = aTextureCoord;
+		  }
+		</script>
+		
+		<script id="shader-vs" type="x-shader/x-vertex">
+		  attribute vec3 aVertexPosition;
+		  attribute vec2 aTextureCoord;	
+		  varying vec2 vTextureCoord;
+		  
+		  void main(void)
+		  {
+			gl_Position = vec4(aVertexPosition, 1.0);
+			vTextureCoord = aTextureCoord;
+		  }
+		</script>
+		<script type="text/javascript">
+var gl;
+var canvas;
+var shaderProgram;
+var demTexture8;
+var demTexture16;
+var coloredDemTexture;
+
+// FPS Calc
+var framecounter = 0; //counts frames per seconds
+var frameRate = 0;
+var lastTime = new Date();
+
+// init UI
+var UICenter;
+var UICenterNormalized;
+var lineVertices = [
+       -1.0, 1.0,  0.0, 
+       0.0,0.0,0.0  
+    ];
+
+//initial analysis values
+var azimuthDeg = 315.0; //will be passed to shader
+var zenithDeg = 45.0;
+
+//initial drawingMode
+var drawingMode = {};
+drawingMode.DEM = 0;
+drawingMode.SLOPE = 1;
+drawingMode.ASPECT = 2;
+drawingMode.HILLSHADE = 3;
+drawingMode.COLORHILLSHADE = 4;
+
+activeDrawingMode = drawingMode.COLORHILLSHADE;
+
+//initial bitMode
+var bitMode = {};
+bitMode.INT8 = 8;
+bitMode.INT16 = 16;
+
+activeBitMode = bitMode.INT8;
+
+function init() {
+	initGL();
+	initShaders();  
+	demTexture8  = initTexture("data/streched_0-43798.png"); //1024
+	demTexture16 = initTexture("data/RGBA_height_16bit.png"); //1024
+	coloredDemTexture = initTexture("data/heightcolors.png"); //1024
+	
+	
+	//Events
+	UICenter = [canvas.width/2, canvas.height/2]; //UI starts with canvas center
+	UICenterNormalized = [0.0,0.0];
+	canvas.onmousemove = function (event) {
+	  var currtopLeft = canvas.getBoundingClientRect();
+	  var mouseX = event.clientX - currtopLeft.left;
+	  var mouseY = event.clientY - currtopLeft.top;
+	  var centerX = UICenter[0];
+	  var centerY = UICenter[1];
+	  var northVec = [1,0];
+	  var userVec = [mouseX - centerX, mouseY - centerY]; //vector from centerpoint of canvas to mouse
+	  //calc azimuth for uniform
+	  azimuthDeg = 180 - (Math.acos(userVec[1]/(Math.sqrt(Math.pow(userVec[0],2)+ Math.pow(userVec[1],2))))  * (180/Math.PI));
+	  if (mouseX-centerX < 0){azimuthDeg = 360-azimuthDeg;}
+	  //set UIMouseXY
+	  var UIMouseXYNormalized = [(mouseX / (canvas.width/2))-1, -((mouseY / (canvas.height/2))-1)];
+	  lineVertices[0]=UIMouseXYNormalized[0];
+	  lineVertices[1]=UIMouseXYNormalized[1];
+	  
+	  //display
+	  document.getElementById('azimuth').value = azimuthDeg;
+	}
+	
+	canvas.onclick = function (event) {
+	  var currtopLeft = canvas.getBoundingClientRect();
+	  var mouseX = event.clientX - currtopLeft.left;
+	  //var mouseY = (canvas.height-1) - event.clientY - currtopLeft[1];
+	  var mouseY = event.clientY - currtopLeft.top;
+	  //set UICenter
+	  UICenter = [mouseX,mouseY];
+	  UICenterNormalized = [(mouseX / (canvas.width/2))-1, -((mouseY / (canvas.height/2))-1)];
+	  lineVertices[3]=UICenterNormalized[0];
+	  lineVertices[4]=UICenterNormalized[1];
+	}
+	
+	initBuffers();
+    //drawScene();
+    animateScene();
+}
+
+function drawScene()  {
+   
+    gl.useProgram(shaderProgram);
+   
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBufferID);
+	gl.enableVertexAttribArray(vertexPositionAttribute);
+	gl.vertexAttribPointer(vertexPositionAttribute, triangleVertexPositionBufferID.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER,demTextureCoordBufferID);
+    gl.enableVertexAttribArray(textureCoordAttribute);
+	gl.vertexAttribPointer(textureCoordAttribute,demTextureCoordBufferID.itemSize, gl.FLOAT, false, 0,0);
+		
+	if (activeBitMode == bitMode.INT8){
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, demTexture8);
+	gl.uniform1i(gl.getUniformLocation(shaderProgram, "uDemTexture"), 0);
+	}
+	if (activeBitMode == bitMode.INT16){
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, demTexture16);
+	gl.uniform1i(gl.getUniformLocation(shaderProgram, "uDemTexture"), 0);
+	}
+	
+	
+	gl.activeTexture(gl.TEXTURE1);
+	gl.bindTexture(gl.TEXTURE_2D, coloredDemTexture);
+	gl.uniform1i(gl.getUniformLocation(shaderProgram, "uColorDemTexture"), 1);
+
+	//azimuth variable
+	gl.uniform1f(gl.getUniformLocation(shaderProgram, "uAzimuthDeg"), azimuthDeg);
+	//zenith variable
+	gl.uniform1f(gl.getUniformLocation(shaderProgram, "uZenithDeg"), zenithDeg);
+	//drawingMode variable
+	gl.uniform1i(gl.getUniformLocation(shaderProgram, "uMode"), activeDrawingMode);
+	//bitMode variable
+	gl.uniform1i(gl.getUniformLocation(shaderProgram, "uBitMode"), activeBitMode);
+	
+	
+	//draw data
+	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBufferID.numItems);
+	
+	//draw UI
+	gl.useProgram(lineShaderProgram);
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, lineVertexPositionBufferID);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVertices), gl.STATIC_DRAW);
+	gl.enableVertexAttribArray(lineVertexPositionAttribute);
+	gl.vertexAttribPointer(lineVertexPositionAttribute, lineVertexPositionBufferID.itemSize, gl.FLOAT, false, 0, 0);
+	gl.lineWidth(2.0);
+
+	gl.drawArrays(gl.LINES, 0, lineVertexPositionBufferID.numItems);
+	
+	// calc FPS
+	framecounter++;
+	var now = new Date();
+	// if more than 1 second has elapsed, recalculate fps
+      if(now - lastTime > 1000){
+        frameRate = framecounter/(now-lastTime)*1000;
+        framecounter = 0;
+        lastTime = now;
+      }
+    //display FPS
+    document.getElementById('fps').textContent = Math.floor(frameRate);
+}
+
+function animateScene(){
+	drawScene();
+	requestAnimFrame(animateScene, canvas)
+}
+			
+requestAnimFrame = (function() {
+	return  window.requestAnimationFrame ||
+	        window.webkitRequestAnimationFrame ||
+	        window.mozRequestAnimationFrame ||
+	        window.oRequestAnimationFrame ||
+	        window.msRequestAnimationFrame ||
+			function(callback, element){ window.setTimeout(callback, 1000 / 60); }
+})();
+
+
+	// Die Funktion initGL erkennt den Browser (derzeit webkit und Minefield)
+  function initGL()   {
+  
+    canvas = document.getElementById("WebGL-canvas"); //herkömmliche Javascript-Funktion um auf die Zeichenfläche zugreifen zu können.
+    try    {
+	
+      gl = canvas.getContext("experimental-webgl");
+    }  catch(e)  {  }
+    if (!gl)    {
+	
+      try      {
+	  
+        gl = canvas.getContext("webkit-3d");
+      }   catch(e)   {   }
+    }
+    if (!gl)    {
+	
+      try      {
+	  
+        gl = canvas.getContext("moz-webgl");
+      }   catch(e)  {   }
+    }
+    if (!gl)    {
+	
+      alert("WebGL not found. Please check if your browser supports WebGL.");
+    }
+  }
+  
+  //Die Funktion getShader durchsucht die Quelldatei (diese hier vor dir!) nach den Shader Scripten und
+  // sorgt dafür, dass die Shader im WebGL-Kontext benutzt werden können.
+  function getShader(gl, id)  {
+  
+      var shaderScript = document.getElementById(id); //die id ist ein String mit dem Namen des Script-Objektes, z.B. "shader-fs"
+      if (!shaderScript)
+          return null;
+
+      var str = "";
+      var k = shaderScript.firstChild;
+      while (k)      {
+	  
+          if (k.nodeType == 3)
+              str += k.textContent;
+          k = k.nextSibling;
+      }
+
+      var shader;
+      if (shaderScript.type == "x-shader/x-fragment")      {
+	  
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+      }
+      else if (shaderScript.type == "x-shader/x-vertex")      {
+	  
+          shader = gl.createShader(gl.VERTEX_SHADER);
+      }
+      else      {
+	  
+          return null;
+      }
+
+      gl.shaderSource(shader, str); //str enhält hier den kompletten Quellcode des Shaderscripts
+      gl.compileShader(shader);     
+
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))      {
+	  
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+      }
+
+      return shader;
+  }
+  
+  
+function initShaders()  {
+  
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader   = getShader(gl, "shader-vs");
+	
+	var fragmentLineShader = getShader(gl, "line-shader-fs");
+	var vertexLineShader   = getShader(gl, "line-shader-vs");
+	
+    shaderProgram      = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    
+    lineShaderProgram  = gl.createProgram();
+    gl.attachShader(lineShaderProgram, vertexLineShader);
+    gl.attachShader(lineShaderProgram, fragmentLineShader);
+    gl.linkProgram(lineShaderProgram);
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))    {
+	
+      alert("Could not initialise shaders");
+    }
+    
+    if (!gl.getProgramParameter(lineShaderProgram, gl.LINK_STATUS))    {
+	
+      alert("Could not initialise line shaders");
+    }
+	
+  }
+  
+function initBuffers()  {
+    triangleVertexPositionBufferID = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBufferID);
+    var vertices = [
+				  //left triangle:
+			        -1.0, -1.0,  0.0,  //x y z des ersten Dreieckpunktes  
+			       1.0,  1.0,  0.0,  //x y z des dritten  Dreieckpunktes
+				   -1.0, 1.0,  0.0, //x y z des zweiten  Dreieckpunktes
+				  	
+				  //right triangle
+				  	-1.0, -1.0,  0.0,  //x y z des ersten Dreieckpunktes 
+				  	1.0,  -1.0,  0.0,  //x y z des dritten  Dreieckpunktes
+				  	1.0,  1.0,  0.0 //x y z des dritten  Dreieckpunktes 
+				  	
+			    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    triangleVertexPositionBufferID.itemSize = 3;  //Drei Koordinaten pro Elememt
+    triangleVertexPositionBufferID.numItems = 6;  //Drei Punkte im Dreieck
+  	vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    
+    //TEXTURENKOORDINATEN:
+    demTextureCoordBufferID = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, demTextureCoordBufferID);
+	var demTextureCoord = [
+			      0.0, 1.0,
+			      1.0, 0.0,
+			      0.0, 0.0,
+			      0.0, 1.0,
+			      1.0, 1.0,
+			      1.0, 0.0
+			   	];
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(demTextureCoord), gl.STATIC_DRAW);
+    //gl.vertexAttribPointer(textureCoordAttribute, 2, gl.FLOAT, false, 0, 0);
+	demTextureCoordBufferID.itemSize = 2;
+	demTextureCoordBufferID.numItems = 6;
+	textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+	
+	//UI Line
+	lineVertexPositionBufferID = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, lineVertexPositionBufferID);
+    lineVertexPositionBufferID.itemSize = 3;  //Drei Koordinaten pro Elememt
+    lineVertexPositionBufferID.numItems = 2;  //Drei Punkte im Dreieck
+    lineVertexPositionAttribute = gl.getAttribLocation(lineShaderProgram, "aVertexPosition");
+  }
+  
+  
+function initTexture(sFilename)  {
+  	gl.enable(gl.TEXTURE_2D);
+    var texture = gl.createTexture();
+    texture.image = new Image();
+    texture.image.onload = function()    {
+    	gl.bindTexture(gl.TEXTURE_2D, texture);
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+		   
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		//Turn off the need for mips
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		// Set wrapping to CLAMP_TO_EDGE
+		gl.texParameteri(gl.TEXTURE_2D, gl.WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.WRAP_T, gl.CLAMP_TO_EDGE);
+	  
+		gl.bindTexture(gl.TEXTURE_2D, null);
+    }
+    texture.image.src = sFilename; 
+    return texture;
+}
+  
+	</script>
+		
+	<style type="text/css"></style></head>
+	<body onload="init();">
+		<div id="main">
+			<h1 style="display: inline;">GIS Analysis with WebGL</h1> 
+			<p>
+				This example shows a browser side <span class="highlight">real-time hillshade</span> calculation of a 1024x1024 input DEM raster. 
+				It uses WebGL technology to exploit the parallel computation power of the graphics card (GPU). 
+				That way the application computes the value of each pixel in parallel instead of classical serial computation on the main processor (CPU). You can also watch the DEM used for the calculation, SLOPE and ASPECT calculations which are a byproduct of the HILLSHADE algorithm. 
+				Try also the difference between 8 and 16 bit DEM precision.
+				<br>It's faaaassssst.... CLICK TO SET SHADING TARGET
+				<span style="float:right;"><span> Azimuth: <input type="text" id="azimuth" value="315.0" onkeyup="azimuthDeg = this.value;"></span><span> Zenith: <input type="text" id="zenith" value="45.0" onkeyup="zenithDeg = this.value;"></span><span> FPS: <span id="fps">40</span></span></span>
+			</p>
+			<div id="display">
+			<!-- <img id="heightcolors" src="data/heightcolors.png"> -->
+			<canvas id="WebGL-canvas" height="1024" width="1024"></canvas>
+			<div id="switchWrapper">
+				<div id="switchBackground"></div>
+				<div id="switchContainer">
+				  DEM Precision<br>
+				  8 BIT<input type="radio" name="precision" value="8" onclick="activeBitMode = this.value;" checked="checked"><input type="radio" name="precision" value="16" onclick="activeBitMode = this.value;">16 BIT<br>
+				  <hr>
+				  <input type="radio" name="analysis" value="0" onclick="activeDrawingMode = this.value;">DEM<br>
+				  <input type="radio" name="analysis" value="1" onclick="activeDrawingMode = this.value;">SLOPE<br>
+				  <input type="radio" name="analysis" value="2" onclick="activeDrawingMode = this.value;">ASPECT<br>
+				  <input type="radio" name="analysis" value="3" onclick="activeDrawingMode = this.value;">HILLSHADE<br>
+				  <input type="radio" name="analysis" value="4" onclick="activeDrawingMode = this.value;" checked="checked">HILLSHADE with colored DEM<br>
+				</div>
+			</div>
+			
+			</div> 
+			<div id="sponsors" class="gradient">
+				&nbsp;&nbsp;
+				<a target="_blank" title="University of Heidelberg" href="http://www.uni-heidelberg.de/index_e.html"><img height="80" width="80" alt="University of Heidelberg" src="./WebGL - GIS Analysis_files/university-of-heidelberg.gif"></a>	
+				&nbsp;&nbsp;
+				<a target="_blank" title="GIScience Group, Institute of Geography, University of Heidelberg" href="http://giscience.uni-hd.de/"><img height="80" width="100" alt="GIScience Group, Institute of Geography, University of Heidelberg" src="./WebGL - GIS Analysis_files/Logo_GIScience.png"></a>
+				<div id="gis">
+					GIScience Research Group, Institute of Geography, University of Heidelberg<br>
+					<a title="GIScience Group, Institute of Geography, University of Heidelberg" target="_blank" href="http://giscience.uni-hd.de/">http://giscience.uni-hd.de</a><br>
+					Website by <a href="http://www.geog.uni-heidelberg.de/personen/gis_auer_en.html">Dipl.-Geogr. M. Auer</a><br>
+					Original DEM Data by USGS, obtained from the <a href="http://www.cc.gatech.edu/projects/large_models/index.html">"Large Geometric Models Archive"</a><br> of the College of Computing at the Georgia Institute of Technology, Atlanta, USA
+				</div>
+			</div>
+		</div>
+	
+</body></html>
