@@ -24,6 +24,9 @@ function WebGLLayer(){
 
 			var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
 
+			var scene = new THREE.Scene();
+			this.scene = scene;
+
 			var view_angle = 45,
 			aspect = width / height,
 			near = 0.1,
@@ -32,15 +35,14 @@ function WebGLLayer(){
 
 			var renderer = new THREE.WebGLRenderer();
 			var camera = new THREE.PerspectiveCamera(view_angle, aspect, near, far);
-
-			var scene = new THREE.Scene();
-			this.scene = scene;
-
-			scene.add(camera);
+			// var terrainscale = 45;
+			// var camera = new THREE.OrthographicCamera( -terrainscale, terrainscale, -terrainscale/3.31, terrainscale/3.31, 1, 40 );    
+			// camera.position.set(0, 0, -1);
 
 			camera.position.set(0,0, 40);
 			camera.lookAt(0,0,0);
 			this.camera = camera;
+			scene.add(camera);
 
 			renderer.setSize(width, height);
 			renderer.shadowMapEnabled = true;
@@ -48,7 +50,7 @@ function WebGLLayer(){
 			renderer.shadowMapType = THREE.PCFShadowMap;
 
 			var terrainLoader = new THREE.TerrainLoader();
-			terrainLoader.load('http://localhost:8000/jotunheimen.bin', function(data){
+			terrainLoader.load('http://localhost:3000/jotunheimen.bin', function(data){
 
 				var geometry = new THREE.PlaneGeometry(60, 60, 199, 199);
 
@@ -87,9 +89,9 @@ function WebGLLayer(){
 			directionalLight.shadowMapHeight = 2048;
 
 			directionalLight.shadowBias = -0.0001;
-			directionalLight.shadowDarkness = 0.5;
+			directionalLight.shadowDarkness = 1;
 
-			directionalLight.shadowCameraVisible = true;
+			// directionalLight.shadowCameraVisible = true;
 			scene.add(directionalLight);
 
 			var controls = new THREE.TrackballControls(camera);
