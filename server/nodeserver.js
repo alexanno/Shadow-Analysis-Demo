@@ -40,7 +40,8 @@ var connString = 'tcp://steffenp@localhost:5431/steffenp';
 io.sockets.on('connection', function(socket){
 	console.log("connected to client");
 	socket.on('dbcall', function(bbox){
-		var query = "SELECT tpgeo As nvec,ST_AsGeoJSON(t2geo) As WKT FROM terraintrondheim WHERE terraintrondheim.t2geo && ST_MakeEnvelope("+bbox[0]+","+bbox[1]+","+bbox[2]+","+bbox[3]+") ORDER BY tpgeo;";
+		// var query = "SELECT tpgeo As nvec,ST_AsGeoJSON(t2geo) As WKT FROM terraintrondheim WHERE terraintrondheim.t2geo && ST_MakeEnvelope("+bbox[0]+","+bbox[1]+","+bbox[2]+","+bbox[3]+") ORDER BY tpgeo;";
+		var query = "SELECT ST_AsGeoJSON(t2geo) As WKT FROM terraintrondheim WHERE terraintrondheim.t2geo && ST_MakeEnvelope("+bbox[0]+","+bbox[1]+","+bbox[2]+","+bbox[3]+");";
 		pg.connect(connString, function(err, client, done){
 			if(client != null){
 				client.query(query, function(err, result) {
