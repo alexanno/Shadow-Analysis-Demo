@@ -56,7 +56,7 @@ var hour = 10;
 $('#buildings').click(function(){
 	map.removeLayer(clayer);
 	map.setView(new L.LatLng(63.4305077539775, 10.395039268075),17);
-	$.getJSON("http:localhost:3000/buildings_trh.geojson",function(buildings){
+	$.getJSON("./buildings_trh.geojson",function(buildings){
 		// var osmb = new OSMBuildings(map).setData(buildings);
 		var osmb = new OSMBuildings(map).loadData();
 		osmb.setDate(new Date(2013,06,02,19));
