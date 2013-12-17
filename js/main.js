@@ -22,7 +22,8 @@ L.control.locate().addTo(map);
 map.setView(new L.LatLng(63.4305077539775, 10.395039268075),18);
 // map.setView(new L.LatLng(61.512,8.286),11);
 // map.setView(new L.LatLng(52.52064, 13.37356),18);
-map.addLayer(topo2enkel);
+// map.addLayer(topo2enkel);
+map.addLayer(osm);
 
 $('#tin').button('toggle');
 clayer = new TINCanvasLayer().alayer;
@@ -32,28 +33,32 @@ $('#tin').click(function(){
 	map.removeLayer(clayer);
 	clayer = new TINCanvasLayer().alayer;
 	clayer.addTo(map);
+
+	var bounds = map.getBounds();
+	var bbox = [bounds.getEast(),bounds.getNorth(),bounds.getWest(),bounds.getSouth()];
+	socket.emit('dbcall', bbox);
 });
 
 $('#webgl').click(function(){
 	map.removeLayer(clayer);
-	map.setView(new L.LatLng(52.52064, 13.37356),18);
+	// map.setView(new L.LatLng(63.4903639613949,9.97520439085427),11);
+		map.setView(new L.LatLng(63.4903639613949,9.96520439085427),10);
 	clayer = new WebGLLayer().alayer;
 	clayer.addTo(map);
 });
 var hour = 10;
 $('#buildings').click(function(){
 	map.removeLayer(clayer);
-	map.setView(new L.LatLng(63.4305077539775, 10.395039268075),18);
+	map.setView(new L.LatLng(63.4305077539775, 10.395039268075),15);
 	$.getJSON("http:localhost:3000/buildings_trh.geojson",function(buildings){
-	// var jsonbuildings = $.parseJSON(buildings);
-	var osmb = new OSMBuildings(map).setData(buildings);
-	osmb.setDate(new Date(2013,06,02,hour));
-	map.addLayer(osmb);
-	setInterval(function(){
-		hour +=0.1;
-		osmb.setDate(new Date(2013,06,02,hour));
-	}),10000
-	});
+		// var osmb = new OSMBuildings(map).setData(buildings);
+		var osmb = new OSMBuildings(map).loadData();
+		osmb.setDate(new Date(2013,06,02,19));
+});
+	// setInterval(function(){
+	// 	hour +=0.1;
+	// 	osmb.setDate(new Date(2013,06,02,hour));
+	// },10000);
 
 });
 

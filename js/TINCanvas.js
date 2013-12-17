@@ -10,7 +10,7 @@ function TINCanvasLayer(){
 			for(var i=0; i<jsonpolygons.rowCount;i++){
 
 				var polygon = JSON.parse(jsonpolygons.rows[i].wkt);
-				//var nvec = jsonpolygons.rows[i].nvec.split(' ');
+				var nvec = jsonpolygons.rows[i].nvec.split(' ');
 				ctx.beginPath();
 				var coordinates = polygon.coordinates[0];
 				for(var j=0; j<coordinates.length;j++){
@@ -26,8 +26,8 @@ function TINCanvasLayer(){
 					}
 				}
 				var sunvec = getSunVector(map.getCenter());
-				//var angle = getAngleBetweenVectors(sunvec,nvec);
-				var angle = 0.3;
+				var angle = getAngleBetweenVectors(sunvec,nvec);
+				// var angle = 0.3;
 				var amount = angle/2*Math.PI;
 				ctx.fillStyle = "hsl(0,0%,"+amount*100+"%)";
 				ctx.fill();

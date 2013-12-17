@@ -11,6 +11,7 @@ function WebGLLayer(){
 			this.requestAnimationFrame.call(window,this.render);
 		},
 		onRemove: function(){
+			this.scene.remove(plane);
 			var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
 			container.removeChild(this.renderer.domElement);
 			map.off({
@@ -39,7 +40,7 @@ function WebGLLayer(){
 			// var camera = new THREE.OrthographicCamera( -terrainscale, terrainscale, -terrainscale/3.31, terrainscale/3.31, 1, 40 );    
 			// camera.position.set(0, 0, -1);
 
-			camera.position.set(0,0, 40);
+			camera.position.set(0,0, 52);
 			camera.lookAt(0,0,0);
 			this.camera = camera;
 			scene.add(camera);
@@ -50,46 +51,48 @@ function WebGLLayer(){
 			renderer.shadowMapType = THREE.PCFShadowMap;
 
 			var terrainLoader = new THREE.TerrainLoader();
-			terrainLoader.load('http://localhost:3000/jotunheimen.bin', function(data){
+			// terrainLoader.load('http://localhost:3000/jotunheimen.bin', function(data){
+				terrainLoader.load('http://localhost:3000/trondheimterrain.bin', function(data){
 
-				var geometry = new THREE.PlaneGeometry(60, 60, 199, 199);
+					var geometry = new THREE.PlaneGeometry(60, 60, 199, 199);
 
-				for (var i = 0, l = geometry.vertices.length; i < l; i++) {
-					geometry.vertices[i].z = data[i] / 65535 * 10;
-				}
+					for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+						geometry.vertices[i].z = data[i] / 65535 * 10;
+					}
 
-				var material = new THREE.MeshPhongMaterial({
-					transparent: true,
-					opacity: 0.2,
-					shading: THREE.FlatShading
+					var material = new THREE.MeshPhongMaterial({
+						transparent: true,
+						opacity: 0.2,
+						shading: THREE.FlatShading
+					});
+
+					var plane = new THREE.Mesh(geometry, material);
+					this.plane = plane;
+					plane.castShadow = true;
+					plane.receiveShadow = true;
+
+					scene.add(plane);
+
 				});
 
-				var plane = new THREE.Mesh(geometry, material);
-				plane.castShadow = true;
-				plane.receiveShadow = true;
+				var directionalLight = new THREE.DirectionalLight(0xffffff);
+				this.directionalLight = directionalLight;
+				directionalLight.position.set(25,25,50);
+				directionalLight.target.position.set(0,0,0);
+				directionalLight.castShadow = true;
 
-				scene.add(plane);
+				directionalLight.shadowCameraTop = 50;
+				directionalLight.shadowCameraBottom = -50;
+				directionalLight.shadowCameraLeft = 50;
+				directionalLight.shadowCameraRight = -50;
+				directionalLight.shadowCameraNear = 0;
+				directionalLight.shadowCameraFar = 200;
 
-			});
+				directionalLight.shadowMapWidth = 2048;
+				directionalLight.shadowMapHeight = 2048;
 
-			var directionalLight = new THREE.DirectionalLight(0xffffff);
-			this.directionalLight = directionalLight;
-			directionalLight.position.set(25,25,50);
-			directionalLight.target.position.set(0,0,0);
-			directionalLight.castShadow = true;
-
-			directionalLight.shadowCameraTop = 50;
-			directionalLight.shadowCameraBottom = -50;
-			directionalLight.shadowCameraLeft = 50;
-			directionalLight.shadowCameraRight = -50;
-			directionalLight.shadowCameraNear = 0;
-			directionalLight.shadowCameraFar = 200;
-
-			directionalLight.shadowMapWidth = 2048;
-			directionalLight.shadowMapHeight = 2048;
-
-			directionalLight.shadowBias = -0.0001;
-			directionalLight.shadowDarkness = 1;
+				directionalLight.shadowBias = -0.0001;
+				directionalLight.shadowDarkness = 1;
 
 			// directionalLight.shadowCameraVisible = true;
 			scene.add(directionalLight);
