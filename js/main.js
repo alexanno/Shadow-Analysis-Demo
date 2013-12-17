@@ -25,19 +25,25 @@ map.setView(new L.LatLng(63.4305077539775, 10.395039268075),18);
 // map.addLayer(topo2enkel);
 map.addLayer(osm);
 
-$('#tin').button('toggle');
-clayer = new TINCanvasLayer().alayer;
-clayer.addTo(map);
+// $('#tin').button('toggle');
+// clayer = new TINCanvasLayer().alayer;
+// clayer.addTo(map);
 
-$('#tin').click(function(){
-	map.removeLayer(clayer);
-	clayer = new TINCanvasLayer().alayer;
-	clayer.addTo(map);
+// $('#tin').click(function(){
+// 	console.log('done!');
 
-	var bounds = map.getBounds();
-	var bbox = [bounds.getEast(),bounds.getNorth(),bounds.getWest(),bounds.getSouth()];
-	socket.emit('dbcall', bbox);
-});
+// 	$.getJSON("http://localhost:3000/polygons.geojson", function(data){
+// 		console.log(data);
+// 	});
+
+// 	map.removeLayer(clayer);
+// 	clayer = new TINCanvasLayer().alayer;
+// 	clayer.addTo(map);
+
+// 	var bounds = map.getBounds();
+// 	var bbox = [bounds.getEast(),bounds.getNorth(),bounds.getWest(),bounds.getSouth()];
+// 	// socket.emit('dbcall', bbox);
+// });
 
 $('#webgl').click(function(){
 	map.removeLayer(clayer);
@@ -49,7 +55,7 @@ $('#webgl').click(function(){
 var hour = 10;
 $('#buildings').click(function(){
 	map.removeLayer(clayer);
-	map.setView(new L.LatLng(63.4305077539775, 10.395039268075),15);
+	map.setView(new L.LatLng(63.4305077539775, 10.395039268075),17);
 	$.getJSON("http:localhost:3000/buildings_trh.geojson",function(buildings){
 		// var osmb = new OSMBuildings(map).setData(buildings);
 		var osmb = new OSMBuildings(map).loadData();
@@ -62,24 +68,25 @@ $('#buildings').click(function(){
 
 });
 
-// connects to db
-var socket = io.connect('http://localhost:3001');
+// // connects to db
+// var socket = io.connect('http://localhost:3001');
 
 // request polygons data
-var bounds = map.getBounds();
-var bbox = [bounds.getEast(),bounds.getNorth(),bounds.getWest(),bounds.getSouth()];
-socket.emit('dbcall', bbox);
+// var bounds = map.getBounds();
+// var bbox = [bounds.getEast(),bounds.getNorth(),bounds.getWest(),bounds.getSouth()];
+// socket.emit('dbcall', bbox);
+clayer = new TINCanvasLayer().alayer;
 
 map.on('moveend', function(e){
 	clayer.initredraw(map.getBounds());
 });
 
-// recieve delaunay triangles
-socket.on('dbresponse', function(result){
-	jsonpolygons = result;
-	console.log(result);
-	clayer.redraw();
-});
+// // recieve delaunay triangles
+// socket.on('dbresponse', function(result){
+// 	jsonpolygons = result;
+// 	clayer.redraw();
+// });
+
 
 function getSunVector(latLng){
 	var sunsphere = SunCalc.getSunPosition(date,latLng.lat,latLng.lng);

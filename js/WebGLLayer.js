@@ -29,9 +29,11 @@ function WebGLLayer(){
 			this.scene = scene;
 
 			var view_angle = 45,
-			aspect = width / height,
+			// aspect = width / height,
+			aspect = 2.1026282853566958,
 			near = 0.1,
 			far = 10000;
+
 
 
 			var renderer = new THREE.WebGLRenderer();
@@ -40,7 +42,7 @@ function WebGLLayer(){
 			// var camera = new THREE.OrthographicCamera( -terrainscale, terrainscale, -terrainscale/3.31, terrainscale/3.31, 1, 40 );    
 			// camera.position.set(0, 0, -1);
 
-			camera.position.set(0,0, 52);
+			camera.position.set(0,0, 50);
 			camera.lookAt(0,0,0);
 			this.camera = camera;
 			scene.add(camera);
