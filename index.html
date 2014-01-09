@@ -7,6 +7,7 @@
   <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
   <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="css/leaflet.css" />
+  <link rel="stylesheet" href="css/slider.css" />
   <link rel="stylesheet" type="text/css" href="css/L.Control.Locate.css">
   <link href="css/main.css" rel="stylesheet" media="screen">
     <!--[if lte IE 8]>
@@ -21,6 +22,20 @@
       <![endif]-->
     </head>
     <body>
+
+    <div class="panel panel-default" id="sunSlider">
+        <div class="panel-heading"><h4 class="panel-title" id="sliderheader"><a data-toggle="collapse" data-parent="#sunSlider" href="#collapseOne"> Adjust time of day </a></h4></div>
+        <div class="panel-collapse collapse in" id="collapseOne">
+        <div class="panel-body"> 
+        <div id="sliderblock ">Date:   <div class="slider sliderdate slider-horizontal"></div></div>
+
+        <div id="sliderblock ">Time:   <div class="slider slidertime slider-horizontal"></div></div>
+
+        <p class="text-center" id="datedisplay"> 2013-27-12 16:16</p>
+        </div>
+        </div>
+    </div>
+
       <div id="map"></div>
 
       <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
@@ -68,18 +83,14 @@
     <script src="js/leaflet.js"></script>
     <script src="js/three.min.js" type="text/javascript"></script>
     <script src="js/L.Control.Locate.js" type="text/javascript"></script>
-    <!-- <script src="http://localhost:3001/socket.io/socket.io.js" type="text/javascript"></script> -->
     <script src="js/leaflet_canvas_layer.js" type="text/javascript"></script>
     <script src="js/leaflet_tileloader_mixin.js" type="text/javascript"></script>
-    <!-- // <script src="js/StackBlur.js" type="text/javascript"></script> -->
     <script src="js/SunCalc.js" type="text/javascript"></script>
-    <script src="js/TinCanvas.js" type="text/javascript"></script>
     <script src="js/WebGLLayer.js" type="text/javascript"></script>
     <script src="js/TrackballControls.js" type="text/javascript"></script>
     <script src="js/TerrainLoader.js" type="text/javascript"></script>
+    <script src="js/bootstrap-slider.js" type="text/javascript"></script>
     <script src="js/OSMBuildings-Leaflet.js" type="text/javascript"></script>
-    <!-- <script src="js/buildingjson.js" type="text/javascript"></script> -->
-    <!-- // <script src="js/Stats.js"type="text/javascript"></script> -->
 
     <script src="js/main.js"></script>
   </body>
