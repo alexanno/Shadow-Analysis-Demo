@@ -26,7 +26,7 @@ map.addLayer(osm);
 $('#webgl').click(function(){
 		$('#sunSlider').hide();
 	map.removeLayer(clayer);
-	map.setView(new L.LatLng(63.4903639613949,9.96520439085427),10);
+	map.setView(new L.LatLng(63.50818907107262,9.981630279494063),9);
 	clayer = new WebGLLayer();
 	clayer.addTo(map);
 });
@@ -39,7 +39,7 @@ $('#buildings').click(function(){
 		clayer.setDate(computationDate);
 });
 
-map.setView(new L.LatLng(63.4903639613949,9.96520439085427),10);
+map.setView(new L.LatLng(63.50818907107262,9.981630279494063),9);
 clayer = new WebGLLayer();
 clayer.addTo(map);
 
