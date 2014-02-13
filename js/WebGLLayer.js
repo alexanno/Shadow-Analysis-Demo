@@ -43,7 +43,7 @@ onAdd: function(){
   var renderer = new THREE.WebGLRenderer();
   renderer.setSize(width,height);
 
-  var camera = new THREE.OrthographicCamera(-40*aspect, 40*aspect, 40,-40,-40,40);
+  var camera = new THREE.OrthographicCamera(-42.5*aspect, 42.5*aspect, 42.5,-42.5,-42.5,42.5);
   this.camera = camera;
   camera.lookAt(0,0,0);
   scene.add(camera);
@@ -55,7 +55,7 @@ onAdd: function(){
 
 
   var terrainLoader = new THREE.TerrainLoader();
-  terrainLoader.load('http://localhost:3000/tt.bin', function(data){
+  terrainLoader.load('http://localhost:3000/terrain.bin', function(data){
 
    var geometry = new THREE.PlaneGeometry(60, 60, 199, 199);
    for (var i = 0, l = geometry.vertices.length; i < l; i++) {

@@ -21,12 +21,12 @@ L.control.scale({
 }).addTo(map);
 L.control.locate().addTo(map);
 map.setView(new L.LatLng(63.4305077539775, 10.395039268075),18);
-map.addLayer(osm);
+map.addLayer(topo2enkel);
 
 $('#webgl').click(function(){
 		$('#sunSlider').hide();
 	map.removeLayer(clayer);
-	map.setView(new L.LatLng(63.50818907107262,9.981630279494063),9);
+	map.setView(new L.LatLng(63.489981300706,9.97621768721757),9);
 	clayer = new WebGLLayer();
 	clayer.addTo(map);
 });
@@ -39,9 +39,11 @@ $('#buildings').click(function(){
 		clayer.setDate(computationDate);
 });
 
-map.setView(new L.LatLng(63.50818907107262,9.981630279494063),9);
+map.setView(new L.LatLng(63.489981300706,9.97621768721757),9);
 clayer = new WebGLLayer();
 clayer.addTo(map);
+
+L.marker([63.891678,9.059992]).addTo(map);
 
 function getSunVector(latLng){
 	var sunsphere = SunCalc.getSunPosition(date,latLng.lat,latLng.lng);
