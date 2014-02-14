@@ -45,6 +45,11 @@ clayer.addTo(map);
 
 L.marker([63.891678,9.059992]).addTo(map);
 
+  map.on('zoomend', function(e){
+  	clayer.redraw();
+  });
+
+
 function getSunVector(latLng){
 	var sunsphere = SunCalc.getSunPosition(date,latLng.lat,latLng.lng);
 	var sunvec = [Math.sin(sunsphere.altitude)*Math.cos(sunsphere.azimuth),Math.sin(sunsphere.altitude)*Math.sin(sunsphere.azimuth),Math.cos(sunsphere.altitude)];

@@ -12,13 +12,13 @@
     //               //       Math.round(topLeft.x) + ' px,' +
     //               //       Math.round(topLeft.y) + ' px)';
 
-   this.controls.update();
-   this.renderer.render(this.scene, this.camera);
-   this.requestAnimationFrame.call(window,this.render);
- },
- setDate: function(){}
- ,
- onRemove: function(){
+  this.controls.update();
+  this.renderer.render(this.scene, this.camera);
+  this.requestAnimationFrame.call(window,this.render);
+},
+setDate: function(){}
+,
+onRemove: function(){
   this.scene.remove(plane);
   var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
   container.removeChild(this.renderer.domElement);
@@ -35,6 +35,8 @@ onAdd: function(){
   var height = map.getSize().y;
   var aspect = width/height;
 
+  console.log(height);
+
   var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
 
   var scene = new THREE.Scene();
@@ -43,7 +45,14 @@ onAdd: function(){
   var renderer = new THREE.WebGLRenderer();
   renderer.setSize(width,height);
 
-  var camera = new THREE.OrthographicCamera(-42.5*aspect, 42.5*aspect, 42.5,-42.5,-42.5,42.5);
+  var zoom = map.getZoom();
+
+  // var height2 = height/890 * 80;
+  var height2 = height/890 * Math.pow(2,zoom)/Math.pow(2,9) * 80;
+
+
+  // var camera = new THREE.OrthographicCamera(-40*aspect, 40*aspect, 40,-40,-40,40);
+  var camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
   this.camera = camera;
   camera.lookAt(0,0,0);
   scene.add(camera);
@@ -112,38 +121,16 @@ onAdd: function(){
   this.theta = theta;
 },
 
-initredraw: function(){
- this.redraw();
+redraw: function(){
+    var zoom = map.getZoom();
+    var height = map.getSize().y;
+    var width = map.getSize().x;
+    var aspect = width/height;
+    var height2 = height/890 * Math.pow(2,9)/Math.pow(2,zoom) * 80;
+    this.camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
 },
+
 update: function(){
 
-            // var topLeft = map.getBounds()._northEast;
-
-            // var zoom = map.getZoom();
-            // var scale = Math.pow(2,zoom);
-            // var offset = map.latLngToLayerPoint(topLeft);
-
-            // this.camera.position.x = offset.x;
-            // this.camera.position.y = offset.y;
-            // this.camera.scale.x = this.width / 256 / scale;
-            // this.camera.scale.y = this.width / 256 / scale;
-            // this.render();
-          }
-        });
-      // WebGLLayer.CSS_TRANSFORM = (function(){
-      //       var div = document.createElement('div');
-      //       var props = [
-      //       'transform',
-      //       'WebkitTransform',
-      //       'MozTransform',
-      //       'OTransform',
-      //       'msTransform'];
-
-      //       for (var i = 0; i < props.length; i++) {
-      //             var prop = props[i];
-      //             if(div.style[prop] !== undefined){
-      //                   return prop;
-      //             }
-      //       }
-      //       return props[0];
-      // })();
+}
+});
