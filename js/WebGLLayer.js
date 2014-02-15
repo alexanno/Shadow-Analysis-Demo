@@ -27,6 +27,7 @@ onRemove: function(){
    'move': this._render
  }, this);
 },
+
 onAdd: function(){
 
   $('#sunSlider').hide();
@@ -34,8 +35,8 @@ onAdd: function(){
   var width = map.getSize().x;
   var height = map.getSize().y;
   var aspect = width/height;
-
-  console.log(height);
+  var zoom;
+  this.zoom = map.getZoom();
 
   var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
 
@@ -113,24 +114,50 @@ onAdd: function(){
   this.renderer = renderer;
   this.render();
 
+  this.layerCenter = map.latLngToLayerPoint(new L.LatLng(63.489981300706,9.97621768721757));
+
+  var canvas;
+  this.canvas = renderer.domElement;
   container.appendChild(renderer.domElement);
 
   var radius = 50;
   this.radius = radius;
   var theta = 5;
   this.theta = theta;
+
+},
+
+_hide : function () {
+  this.canvas.style.display = 'none';
+},
+
+_show : function () {
+  this.canvas.style.display = 'block';
 },
 
 redraw: function(){
-    var zoom = map.getZoom();
-    var height = map.getSize().y;
-    var width = map.getSize().x;
-    var aspect = width/height;
-    var height2 = height/890 * Math.pow(2,9)/Math.pow(2,zoom) * 80;
-    this.camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
-},
 
-update: function(){
+  console.log(this.layerCenter);
 
+  var offsetx, offsety;
+
+  var currentzoom = map.getZoom();
+  var height = map.getSize().y;
+  var width = map.getSize().x;
+  var aspect = width/height;
+  var height2 = height/890 * Math.pow(2,9)/Math.pow(2,currentzoom) * 80;
+
+  var projectedPoint = this.layerCenter;
+  var projectedCurrent = map.latLngToLayerPoint(new L.LatLng(63.489981300706,9.97621768721757));
+
+  offsetx = (projectedCurrent.x - projectedPoint.x)
+  offsety = (projectedCurrent.y - projectedPoint.y);
+
+  console.log(offsetx,offsety);
+
+  this.renderer.domElement.style.webkitTransform = "translate("+offsetx+"px,"+offsety+"px)";
+
+  this.camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
 }
+
 });

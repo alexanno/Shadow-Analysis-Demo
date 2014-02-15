@@ -46,8 +46,9 @@ clayer.addTo(map);
 L.marker([63.891678,9.059992]).addTo(map);
 
   map.on('zoomend', function(e){
-  	clayer.redraw();
+    clayer.redraw();
   });
+
 
 
 function getSunVector(latLng){
