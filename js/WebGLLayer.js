@@ -52,8 +52,8 @@ onAdd: function(){
   var height2 = height/890 * Math.pow(2,zoom)/Math.pow(2,9) * 80;
 
 
-  // var camera = new THREE.OrthographicCamera(-40*aspect, 40*aspect, 40,-40,-40,40);
   var camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
+  console.log("FIRST: "+-aspect*height2/2+" SECOND: "+ height2/2);
   this.camera = camera;
   camera.lookAt(0,0,0);
   scene.add(camera);
@@ -153,11 +153,13 @@ redraw: function(){
   offsetx = (projectedCurrent.x - projectedPoint.x)
   offsety = (projectedCurrent.y - projectedPoint.y);
 
-  console.log(offsetx,offsety);
+  var scalezoom = Math.pow(2,currentzoom)/Math.pow(2,9);
 
-  this.renderer.domElement.style.webkitTransform = "translate("+offsetx+"px,"+offsety+"px)";
+  this.zoom = currentzoom;
 
-  this.camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
+  this.canvas.style.webkitTransform = "translate("+offsetx+"px,"+offsety+"px) "+"scale("+scalezoom+")";
+  console.log(this.canvas.style);
+  // this.camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
 }
 
 });
