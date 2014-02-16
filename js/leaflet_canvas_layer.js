@@ -7,6 +7,7 @@ L.CanvasLayer = L.Class.extend({
   includes: [L.Mixin.Events, L.Mixin.TileLoader],
 
   options: {
+      midLatLng: new L.LatLng(60,10),
       minZoom: 0,
       maxZoom: 28,
       tileSize: 256,
@@ -24,6 +25,7 @@ L.CanvasLayer = L.Class.extend({
     var self = this;
     //this.project = this._project.bind(this);
     this.render = this.render.bind(this);
+    this.midLatLng = options.midLatLng; // Added center point of terrain layer
     L.Util.setOptions(this, options);
     this._canvas = document.createElement('canvas');
     this._ctx = this._canvas.getContext('2d');

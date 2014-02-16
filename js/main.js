@@ -1,4 +1,5 @@
-var jsonpolygons; //polygons for the shadow
+"use strict";
+
 var date = new Date();
 var map = L.map('map');
 var clayer;
@@ -21,37 +22,29 @@ L.control.scale({
 }).addTo(map);
 L.control.locate().addTo(map);
 map.setView(new L.LatLng(63.4305077539775, 10.395039268075),18);
-map.addLayer(topo2enkel);
+map.addLayer(osm);
 
 $('#webgl').click(function(){
-		$('#sunSlider').hide();
+	$('#sunSlider').hide();
 	map.removeLayer(clayer);
-	map.setView(new L.LatLng(63.489981300706,9.97621768721757),9);
-	clayer = new WebGLLayer();
-	clayer.addTo(map);
+	clayer = new WebGLLayer({
+		midLatLng: new L.LatLng(63.489981300706,9.97621768721757)
+	}).addTo(map);
 });
+
 var hour = 10;
 $('#buildings').click(function(){
 	$('#sunSlider').show();
 	map.removeLayer(clayer);
 	map.setView(new L.LatLng(63.4305077539775, 10.395039268075),17);
-		clayer = new OSMBuildings(map).loadData();
-		clayer.setDate(computationDate);
+	clayer = new OSMBuildings(map).loadData();
+	clayer.setDate(computationDate);
 });
 
-map.setView(new L.LatLng(63.489981300706,9.97621768721757),9);
-clayer = new WebGLLayer();
-clayer.addTo(map);
+clayer = new WebGLLayer({
+	midLatLng: new L.LatLng(63.489981300706,9.97621768721757)
+}).addTo(map);
 
-L.marker([63.891678,9.059992]).addTo(map);
-
-  map.on('zoomend', function(e){
-    clayer.redraw();
-  });
-
-  map.on('zoomstart', function(e){
-  	clayer.zoom = map.getZoom();
-  })
 
 
 
@@ -59,13 +52,6 @@ function getSunVector(latLng){
 	var sunsphere = SunCalc.getSunPosition(date,latLng.lat,latLng.lng);
 	var sunvec = [Math.sin(sunsphere.altitude)*Math.cos(sunsphere.azimuth),Math.sin(sunsphere.altitude)*Math.sin(sunsphere.azimuth),Math.cos(sunsphere.altitude)];
 	return sunvec;
-}
-
-function getAngleBetweenVectors(sunvec,nvec){
-	var dot = sunvec[0]*nvec[0]+sunvec[1]*nvec[1]+sunvec[2]*nvec[2];
-	var lensun = Math.sqrt(sunvec[0]*sunvec[0]+sunvec[1]*sunvec[1]+sunvec[2]*sunvec[2]); 
-	var lennvec = Math.sqrt(nvec[0]*nvec[0]+nvec[1]*nvec[1]+nvec[2]*nvec[2]);
-	return Math.acos(dot/(lensun*lennvec));
 }
 
 var hourval = 0;

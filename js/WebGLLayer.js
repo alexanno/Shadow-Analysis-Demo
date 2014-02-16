@@ -1,18 +1,8 @@
 	 var WebGLLayer = L.CanvasLayer.extend({
-	 	render: function(){
-
-	 		this.theta += 1;
-	 		this.directionalLight.position.x = this.radius * Math.sin( THREE.Math.degToRad( this.theta ) );
-	 		this.directionalLight.position.y = this.radius * Math.cos( THREE.Math.degToRad( this.theta ) );
-
-      this.controls.update();
-      this.renderer.render(this.scene, this.camera);
-      this.requestAnimationFrame.call(window,this.render);
-    },
     setDate: function(){}
     ,
     onRemove: function(){
-      this.scene.remove(plane);
+      this.scene.remove(this.plane);
       var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
       container.removeChild(this.renderer.domElement);
       map.off({
@@ -23,28 +13,28 @@
 
     onAdd: function(){
 
-      $('#sunSlider').hide();
+      var self = this;
+
+      map.setView(this.midLatLng,9);
 
       var width = map.getSize().x;
       var height = map.getSize().y;
       var aspect = width/height;
-      var zoom;
-      this.zoom = map.getZoom();
-
-      var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
+      var zoom = map.getZoom();
 
       var scene = new THREE.Scene();
       this.scene = scene;
 
       var renderer = new THREE.WebGLRenderer();
       renderer.setSize(width,height);
+      this.renderer = renderer;
 
-      var zoom = map.getZoom();
+      var container = document.getElementsByClassName('leaflet-overlay-pane')[0];
+      container.appendChild(renderer.domElement);
 
-      var height2 = height/890 * Math.pow(2,zoom)/Math.pow(2,9) * 80;
+      var changeDiff = height/890 * Math.pow(2,zoom)/Math.pow(2,9) * 80;
 
-
-      var camera = new THREE.OrthographicCamera( -aspect * height2/2, aspect * height2/2, height2/2, -height2/2, -40, 40 );
+      var camera = new THREE.OrthographicCamera( -aspect * changeDiff/2, aspect * changeDiff/2, changeDiff/2, -changeDiff/2, -40, 40 );
       this.camera = camera;
       camera.lookAt(0,0,0);
       scene.add(camera);
@@ -102,55 +92,73 @@
       var controls = new THREE.TrackballControls(camera);
       this.controls = controls;
 
-      this.renderer = renderer;
-      this.render();
+      this.layerCenter = map.latLngToLayerPoint(this.midLatLng);
 
-      this.layerCenter = map.latLngToLayerPoint(new L.LatLng(63.489981300706,9.97621768721757));
-
-      var canvas;
       this.canvas = renderer.domElement;
-      container.appendChild(renderer.domElement);
 
       var radius = 50;
       this.radius = radius;
       var theta = 5;
       this.theta = theta;
 
+      this.render();
+
+
       map.on('zoomstart', this._hide, this);
       map.on('zoomend', this._show, this);
 
+      map.on('zoomend', function(e){
+        console.log(this);
+        clayer.redraw();
+      });
+
+      map.on('zoomstart', function(e){
+        clayer.zoom = map.getZoom();
+      })
+
     },
 
-
-    _hide: function (e) {
+    _hide: function () {
       if(this.canvas) this.canvas.style.display = "none"
     },
 
-    _show: function (e) {
-      if(this.canvas) this.canvas.style.display = "inline-block"
-    },
+  _show: function () {
+    if(this.canvas) this.canvas.style.display = "inline-block"
+  },
 
-    redraw: function(){
+redraw: function(){
 
-      var offsetx, offsety;
+  console.log("REDRAWN!");
 
-      var currentzoom = map.getZoom();
-      var height = map.getSize().y;
-      var width = map.getSize().x;
-      var aspect = width/height;
-      var height2 = height/890 * Math.pow(2,9)/Math.pow(2,currentzoom) * 80;
+  var currentzoom = map.getZoom();
+  var height = map.getSize().y;
+  var width = map.getSize().x;
+  var aspect = width/height;
 
-      var projectedPoint = this.layerCenter;
-      var projectedCurrent = map.latLngToLayerPoint(new L.LatLng(63.489981300706,9.97621768721757));
+  var projectedPoint = this.layerCenter;
+  var projectedCurrent = map.latLngToLayerPoint(this.midLatLng);
 
-      offsetx = (projectedCurrent.x - projectedPoint.x)
-      offsety = (projectedCurrent.y - projectedPoint.y);
+  var offsetx, offsety;
 
-      var scalezoom = Math.pow(2,currentzoom)/Math.pow(2,9);
+  offsetx = (projectedCurrent.x - projectedPoint.x)
+  offsety = (projectedCurrent.y - projectedPoint.y);
 
-      this.zoom = currentzoom;
+  var scalezoom = Math.pow(2,currentzoom)/Math.pow(2,9);
 
-      this.canvas.style.webkitTransform = "translate("+offsetx+"px,"+offsety+"px) "+"scale("+scalezoom+")";
+  this.canvas.style[L.DomUtil.TRANSFORM] = "translate("+offsetx+"px,"+offsety+"px) "+"scale("+scalezoom+")";
+
+  this.zoom = currentzoom;
+
+},
+
+render: function(){
+
+  this.theta += 1;
+  this.directionalLight.position.x = this.radius * Math.sin( THREE.Math.degToRad( this.theta ) );
+  this.directionalLight.position.y = this.radius * Math.cos( THREE.Math.degToRad( this.theta ) );
+
+  this.controls.update();
+  this.renderer.render(this.scene, this.camera);
+  this.requestAnimationFrame.call(window,this.render);
 }
-
 });
