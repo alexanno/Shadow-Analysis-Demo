@@ -13,5 +13,5 @@ app.all('*', function(req, res, next) {
 app.use(express.static(__dirname + '/server/assets'));
 app.use(express.static(__dirname));
 
-app.listen(3000);
-console.log('Listening on port 3000');
+app.listen(80);
+console.log('Listening on port 80');
