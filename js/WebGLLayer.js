@@ -48,7 +48,7 @@
 
 
       var terrainLoader = new THREE.TerrainLoader();
-      terrainLoader.load('http://localhost:3000/terrain.bin', function(data){
+      terrainLoader.load('http://shadowviz.herokuapp.com/terrain.bin', function(data){
 
        var geometry = new THREE.PlaneGeometry(60, 60, 199, 199);
        for (var i = 0, l = geometry.vertices.length; i < l; i++) {
