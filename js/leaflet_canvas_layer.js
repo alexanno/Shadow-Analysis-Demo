@@ -8,6 +8,7 @@ L.CanvasLayer = L.Class.extend({
 
   options: {
       midLatLng: new L.LatLng(60,10),
+      sunDate: new Date(),
       minZoom: 0,
       maxZoom: 28,
       tileSize: 256,
@@ -26,6 +27,7 @@ L.CanvasLayer = L.Class.extend({
     //this.project = this._project.bind(this);
     this.render = this.render.bind(this);
     this.midLatLng = options.midLatLng; // Added center point of terrain layer
+    this.sunDate = options.sunDate;
     L.Util.setOptions(this, options);
     this._canvas = document.createElement('canvas');
     this._ctx = this._canvas.getContext('2d');

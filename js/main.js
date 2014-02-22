@@ -42,16 +42,15 @@ $('#buildings').click(function(){
 });
 
 clayer = new WebGLLayer({
-	midLatLng: new L.LatLng(63.489981300706,9.97621768721757)
+	midLatLng: new L.LatLng(63.489981300706,9.97621768721757),
+	sunDate: new Date()
 }).addTo(map);
 
 
 
-
-function getSunVector(latLng){
-	var sunsphere = SunCalc.getSunPosition(date,latLng.lat,latLng.lng);
-	var sunvec = [Math.sin(sunsphere.altitude)*Math.cos(sunsphere.azimuth),Math.sin(sunsphere.altitude)*Math.sin(sunsphere.azimuth),Math.cos(sunsphere.altitude)];
-	return sunvec;
+function getSunVector(dateToCompute, latLng){
+	var sunsphere = SunCalc.getSunPosition(dateToCompute,latLng.lat,latLng.lng);
+	return sunsphere;
 }
 
 var hourval = 0;
@@ -61,7 +60,6 @@ $( ".slidertime" ).slider({'max': 48, 'value':24})
 	hourval = ev.value-24;
 	computationDate = new Date(new Date().getTime()+hourval*3600000+dateval*3600000*24);
 	updateDate();
-
 });
 $( ".sliderdate" ).slider({'max': 365, 'value':182, 'tooltip':'hide'})
 .on('slide', function(ev){
