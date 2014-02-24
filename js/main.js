@@ -22,7 +22,7 @@ L.control.scale({
 }).addTo(map);
 L.control.locate().addTo(map);
 map.setView(new L.LatLng(63.4305077539775, 10.395039268075),18);
-map.addLayer(osm);
+map.addLayer(topo2enkel);
 
 $('#webgl').click(function(){
 	$('#sunSlider').hide();

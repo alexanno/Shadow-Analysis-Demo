@@ -23,21 +23,14 @@
     </head>
     <body>
 
-      <div class="panel panel-default" id="sunSlider">
-        <div class="panel-heading"><h4 class="panel-title" id="sliderheader"><a data-toggle="collapse" data-parent="#sunSlider" href="#collapseOne"> Adjust time of day </a></h4></div>
-        <div class="panel-collapse collapse in" id="collapseOne">
-          <div class="panel-body"> 
-          <p id="hint"> <i>Hint: Shadows are more spectacular during midday and in the summertime.</i></p>
-            <div id="sliderblock ">Date:   <div class="slider sliderdate slider-horizontal"></div></div>
-
-            <div id="sliderblock ">Time:   <div class="slider slidertime slider-horizontal"></div></div>
-
-            <p class="text-center" id="datedisplay"> 2013-27-12 16:16</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="map"></div>
+    <div class="container-fluid">
+    <div class="col-md-2 col-md-offset-5" id="about">
+    	<img class="img-responsive img-circle" src="images/sph.jpg"/>
+    	<h4> Steffen Pøhner Henriksen </h4>
+    	<p><i>MSc student at Norwegian University of Science and Technology, specializing in Geomatics.</i><p>
+    	<p><a href="http://twitter.com/spohner">@spohner</a></p>
+    </div>
+    </div>
 
       <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
         <div class="navbar-header">
@@ -50,14 +43,7 @@
           <a class="navbar-brand" href="index.html">Shadow Visualization Demo</a> 
         </div>
 
-        <div class="btn-group-sm navbar-btn pull-right" id="select-group" data-toggle="buttons">
-          <label class="btn btn-primary" id="webgl">
-            <input type="radio" name="options"> WebGL
-          </label>
-          <label class="btn btn-primary" id="buildings">
-            <input type="radio" nape="options"> Buildings
-          </label>
-        </div>
+
 
         <div class="collapse navbar-collapse navbar-ex1-collapse">
           <ul class="nav navbar-nav navbar-right">
@@ -71,7 +57,6 @@
           </li>
         </ul>
       </div><!-- /.navbar-collapse -->
-
     </nav>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

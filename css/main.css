@@ -51,3 +51,38 @@ html, body, #map{
 	padding-top: 15px;
 	padding-bottom: 0px; 
 }
+
+#about{
+	padding-top: 100px;
+	text-align: center;
+}
+
+.logosize{
+	width: 200px;
+	margin: 0 auto;
+}
+
+.headerdesc{
+	padding-top: 100px;
+	padding-bottom: 50px;
+	color: #5a5a5a;
+	font-family: 'Josefin Sans', sans-serif;
+	text-align: center;
+}
+
+#vendors{
+	text-align: center;
+	color: #5a5a5a;
+	font-family: 'Josefin Sans', sans-serif;
+}
+
+.githublogo{
+	padding-top: 80px;
+	width: 30px;
+	margin: 0 auto;
+}
+
+.featurette-divider {
+  margin-bottom: 40px; /* Space out the Bootstrap <hr> more */
+  margin-top: 0px;
+}

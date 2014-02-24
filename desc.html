@@ -23,21 +23,40 @@
     </head>
     <body>
 
-      <div class="panel panel-default" id="sunSlider">
-        <div class="panel-heading"><h4 class="panel-title" id="sliderheader"><a data-toggle="collapse" data-parent="#sunSlider" href="#collapseOne"> Adjust time of day </a></h4></div>
-        <div class="panel-collapse collapse in" id="collapseOne">
-          <div class="panel-body"> 
-          <p id="hint"> <i>Hint: Shadows are more spectacular during midday and in the summertime.</i></p>
-            <div id="sliderblock ">Date:   <div class="slider sliderdate slider-horizontal"></div></div>
+      <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 headerdesc">
+          <p>
+            This demo uses several open-source libraries, and data which is open and free. Leaflet.js draws the underlying map and provides the navigation, with map tiles supplied from the Norwegian Mapping Authorities. 
 
-            <div id="sliderblock ">Time:   <div class="slider slidertime slider-horizontal"></div></div>
+            <h6> Terrain shadows </h6>
+            A DTM of 50x50m from the Norwegian Mapping Authorities are loaded into the browser by threejs, which makes WebGL easier to handle. The sun's position is found using SunCalc.js and drawn in the 3D scene by threejs. The 3D world in WebGL is then oriented to align with the underlying map. CSS-transforms is used to keep the alignment correct during zooming and panning.
 
-            <p class="text-center" id="datedisplay"> 2013-27-12 16:16</p>
-          </div>
+            <h6> Building shadows </h6> 
+            Buildings and their shadows are drawn on the HTML5 canvas element by the OSMBuildings library. The data is supplied from OpenStreetMap. However, a more accurate version of Trondheim, Norway exists, but is not shown because the data used is not publicly available (FKB-Bygning).
+          </p>
         </div>
       </div>
 
-      <div id="map"></div>
+      <hr class="featurette-divider">
+
+        <div class="row" id="vendors">
+          <div class="col-lg-4">
+            <a href="http://leafletjs.com/"><img src="images/leaflet-logo.png" class="img-responsive logosize" /></a>
+          </div>
+          <div class="col-lg-4">
+            <a href="http://labs.kartverket.no/"><img src="images/kartverket_logo.jpg" class="img-responsive logosize" ></a>
+          </div>
+          <div class="col-lg-4">
+            <a href="http://threejs.org/"><img src="images/threejs-logo.png" class="img-responsive logosize img-circle" ></a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-2 col-lg-offset-5">
+          <a href="https://github.com/spohner/Shadow-Analysis-Demo"><img src="images/github.png" class="img-responsive githublogo"></img></a>
+          </div>
+        </div>
+      </div>
 
       <nav class="navbar navbar-default navbar-fixed-bottom" role="navigation">
         <div class="navbar-header">
@@ -50,28 +69,20 @@
           <a class="navbar-brand" href="index.html">Shadow Visualization Demo</a> 
         </div>
 
-        <div class="btn-group-sm navbar-btn pull-right" id="select-group" data-toggle="buttons">
-          <label class="btn btn-primary" id="webgl">
-            <input type="radio" name="options"> WebGL
-          </label>
-          <label class="btn btn-primary" id="buildings">
-            <input type="radio" nape="options"> Buildings
-          </label>
-        </div>
+
 
         <div class="collapse navbar-collapse navbar-ex1-collapse">
           <ul class="nav navbar-nav navbar-right">
            <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">About the project <b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="desc.html">Short Description</a></li>
+              <li><a href="#">Short Description</a></li>
               <li><a href="shadowviz_steffenp.pdf">Paper (PDF)</a></li>
               <li><a href="about.html">Developed by</a></li>
             </ul>
           </li>
         </ul>
       </div><!-- /.navbar-collapse -->
-
     </nav>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -90,6 +101,6 @@
     <script src="js/bootstrap-slider.js" type="text/javascript"></script>
     <script src="js/OSMBuildings-Leaflet.js" type="text/javascript"></script>
 
-  <script src="js/main.js"></script>
-</body>
-</html>
+    <script src="js/main.js"></script>
+  </body>
+  </html>
